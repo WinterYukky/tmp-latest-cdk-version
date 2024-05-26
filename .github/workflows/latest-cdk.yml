@@ -25,8 +25,18 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Get latest AWS CDK version
-        run: curl -s https://api.github.com/repos/aws/aws-cdk/releases/latest  | jq -r .tag_name | sed 's/v//' > ./cdk-version.txt
+        run: echo AWS_CDK_VERSION=`curl -s https://api.github.com/repos/aws/aws-cdk/releases/latest  | jq -r .tag_name | sed 's/v//'` >> $GITHUB_ENV
+
+      - name: Write latest AWS CDK version to cdk-version.txt
+        run: echo ${{ env.action_state }} > ./cdk-version.txt
 
       # Runs a set of commands using the runners shell
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(deps): upgrade AWS CDK to v${{ env.action_state }}"
+          title: "chore(deps): upgrade AWS CDK to v${{ env.action_state }}"
+          body: Upgrade project AWS CDK version.
+          base: main
+          branch: github-actions/upgrade-aws-cdk
+          delete-branch: true
